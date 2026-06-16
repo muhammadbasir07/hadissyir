@@ -1,0 +1,742 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Book Pengendalian Diri & Review Hadis Digital</title>
+    <style>
+        /* CSS UTAMA & RESPONSIVITAS */
+        :root {
+            --primary-color: #1b5e20;
+            --secondary-color: #2e7d32;
+            --accent-color: #a5d6a7;
+            --text-dark: #212121;
+            --bg-light: #f4f6f4;
+            --sidebar-width: 320px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-light);
+            color: var(--text-dark);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Tombol Mobile Toggle */
+        .mobile-toggle {
+            display: none;
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            z-index: 1001;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+
+        /* SIDEBAR (MENU DI KIRI) */
+        .sidebar {
+            width: var(--sidebar-width);
+            background: white;
+            border-right: 1px solid #e0e0e0;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            transition: transform 0.3s ease;
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .sidebar-header h3 {
+            font-size: 15px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* STYLING NESTED MENU */
+        .menu-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 10px 0;
+        }
+
+        .menu-category {
+            padding: 10px 20px 5px 20px;
+            font-size: 11px;
+            font-weight: bold;
+            color: #757575;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-top: 1px solid #f0f0f0;
+            margin-top: 10px;
+        }
+
+        .menu-category:first-of-type {
+            border-top: none;
+            margin-top: 0;
+        }
+
+        .menu-item {
+            width: 100%;
+            padding: 12px 20px;
+            text-align: left;
+            background: none;
+            border: none;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+            font-weight: 600;
+            color: #424242;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background 0.2s;
+        }
+
+        .menu-item:hover, .menu-item.active {
+            background: #f0f7f0;
+            color: var(--primary-color);
+        }
+
+        /* Sub-menu (Level 2) & Sub-sub-menu (Level 3) */
+        .submenu, .sub-submenu {
+            display: none;
+            background: #fafafa;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .submenu li a, .submenu li .sub-toggle {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px 10px 35px;
+            color: #616161;
+            text-decoration: none;
+            font-size: 13.5px;
+            border-bottom: 1px solid #f5f5f5;
+            cursor: pointer;
+            background: none;
+            border-left: none;
+            border-right: none;
+            border-top: none;
+            width: 100%;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .submenu li a:hover, .submenu li .sub-toggle:hover,
+        .submenu li a.active, .submenu li .sub-toggle.active {
+            color: var(--secondary-color);
+            background: #edf5ed;
+        }
+
+        .sub-submenu li a {
+            padding-left: 55px !important;
+            font-size: 13px !important;
+            font-style: italic;
+            font-weight: normal !important;
+        }
+
+        /* Indikator Panah Dropdown */
+        .arrow::after {
+            content: '➔';
+            font-size: 10px;
+            transition: transform 0.3s;
+            display: inline-block;
+        }
+        
+        .open > .menu-item > .arrow::after,
+        .open > .sub-toggle > .arrow::after {
+            transform: rotate(90deg);
+        }
+
+        /* KONTEN UTAMA (DI KANAN) */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            background: var(--bg-light);
+            height: 100vh;
+            position: relative;
+        }
+
+        .content-section {
+            display: none;
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        /* COVER STYLE (HALAMAN HOME) */
+        .cover-container {
+            text-align: center;
+            padding: 60px 40px;
+            background: linear-gradient(135deg, #1b5e20 0%, #2e7d32 100%);
+            color: white;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            margin-bottom: 20px;
+        }
+
+        .cover-tagline {
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            color: var(--accent-color);
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+
+        .cover-title {
+            font-size: 32px;
+            font-weight: 800;
+            line-height: 1.3;
+            margin-bottom: 25px;
+            border-bottom: none !important;
+            color: white !important;
+            padding-bottom: 0 !important;
+        }
+
+        .cover-subtitle {
+            font-size: 18px;
+            opacity: 0.9;
+            font-style: italic;
+            margin-bottom: 40px;
+        }
+
+        .cover-author {
+            font-size: 16px;
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.15);
+            display: inline-block;
+            padding: 10px 25px;
+            border-radius: 50px;
+            letter-spacing: 1px;
+        }
+
+        /* PDF Frame Container */
+        .pdf-container {
+            display: none;
+            width: 100%;
+            height: calc(100vh - 80px);
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            overflow: hidden;
+        }
+
+        .pdf-container.active {
+            display: block;
+        }
+
+        .pdf-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        /* Desain Tipografi Konten Kitab */
+        h1 { color: var(--primary-color); margin-bottom: 10px; font-size: 24px; border-bottom: 2px solid var(--accent-color); padding-bottom: 8px;}
+        h2 { color: var(--secondary-color); margin-bottom: 20px; font-size: 18px; }
+        
+        .arabic {
+            font-size: 24px;
+            line-height: 2.2;
+            text-align: right;
+            margin: 25px 0;
+            direction: rtl;
+            font-family: 'Traditional Arabic', 'Amiri', serif;
+            color: #111;
+        }
+        
+        .translation {
+            background: #f9f9f9;
+            border-left: 4px solid var(--secondary-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        
+        .explanation {
+            line-height: 1.7;
+            text-align: justify;
+            color: #333;
+        }
+
+        /* Avatar & Box Profil Penulis */
+        .profile-box {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #f0f7f0;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 5px solid var(--primary-color);
+        }
+
+        .profile-avatar {
+            width: 70px;
+            height: 70px;
+            background: var(--primary-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        /* RESPONSIVITAS MOBILE (Breakpoints) */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+            .mobile-toggle {
+                display: block;
+            }
+            .sidebar {
+                position: fixed;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                transform: translateX(-100%);
+                box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            }
+            .sidebar.open {
+                transform: translateX(0);
+            }
+            .main-content {
+                padding: 80px 15px 15px 15px;
+                height: calc(100vh - 0px);
+            }
+            .pdf-container {
+                height: calc(100vh - 110px);
+            }
+            .cover-title { font-size: 24px; }
+            .cover-subtitle { font-size: 15px; }
+            h1 { font-size: 20px; }
+            h2 { font-size: 16px; }
+            .arabic { font-size: 20px; line-height: 2; }
+            .profile-box { flex-direction: column; text-align: center; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Tombol Navigasi Mobile -->
+    <button class="mobile-toggle" id="menuToggle">☰ Menu</button>
+
+    <!-- SIDEBAR KIRI (NESTED MENU) -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <h3>Studi Hadis Digital</h3>
+            <p style="font-size: 11px; opacity: 0.8; margin-top: 5px;">E-Book & Review Digital</p>
+        </div>
+        
+        <nav class="menu-container">
+            
+            <div class="menu-category">Utama</div>
+            
+            <!-- Menu Home / Cover -->
+            <div class="nested-group">
+                <button class="menu-item active" onclick="showContent('halaman-utama')">🏠 HALAMAN UTAMA</button>
+            </div>
+
+            <div class="menu-category">E-Book</div>
+            
+            <!-- Menu Pengantar -->
+            <div class="nested-group">
+                <button class="menu-item" onclick="showContent('kata-pengantar')">KATA PENGANTAR</button>
+            </div>
+
+            <!-- BAB I (Nested Level 1) -->
+            <div class="nested-group">
+                <button class="menu-item">BAB I: EMOSI & AMARAH <span class="arrow"></span></button>
+                <ul class="submenu">
+                    <li><a href="#" onclick="showContent('bab1-a')">a. Kekuatan Sejati</a></li>
+                    <li><a href="#" onclick="showContent('bab1-b')">b. Larangan Marah</a></li>
+                    <li><a href="#" onclick="showContent('bab1-c')">c. Keutamaan Menahan</a></li>
+                    <li><a href="#" onclick="showContent('bab1-d')">d. Keutamaan Memaafkan</a></li>
+                </ul>
+            </div>
+
+            <!-- BAB II -->
+            <div class="nested-group">
+                <button class="menu-item">BAB II: LISAN & UCAPAN <span class="arrow"></span></button>
+                <ul class="submenu">
+                    <li><a href="#" onclick="showContent('bab2-a')">A. Cermin Keimanan</a></li>
+                    <li><a href="#" onclick="showContent('bab2-b')">B. Bahaya Ucapan</a></li>
+                    <li><a href="#" onclick="showContent('bab2-c')">C. Meninggalkan Hal Sia-sia</a></li>
+                </ul>
+            </div>
+
+            <!-- BAB III -->
+            <div class="nested-group">
+                <button class="menu-item">BAB III: SYAHWAT & KONSUMSI <span class="arrow"></span></button>
+                <ul class="submenu">
+                    <li><a href="#" onclick="showContent('bab3-a')">A. Pernikahan & Puasa</a></li>
+                    <li><a href="#" onclick="showContent('bab3-b')">B. Larangan Israf</a></li>
+                    <li><a href="#" onclick="showContent('bab3-c')">C. Menjaga Isi Perut</a></li>
+                </ul>
+            </div>
+
+            <!-- BAB IV -->
+            <div class="nested-group">
+                <button class="menu-item">BAB IV: NAFSU & ORIENTASI <span class="arrow"></span></button>
+                <ul class="submenu">
+                    <li><a href="#" onclick="showContent('bab4-a')">A. Kecerdasan Hakiki</a></li>
+                    <li><a href="#" onclick="showContent('bab4-b')">B. Jalan Cinta Allah (Zuhud)</a></li>
+                    <li><a href="#" onclick="showContent('bab4-c')">C. Bahaya Ketamakan</a></li>
+                </ul>
+            </div>
+
+            <!-- BAB V -->
+            <div class="nested-group">
+                <button class="menu-item">BAB V: KESABARAN SPIRITUAL <span class="arrow"></span></button>
+                <ul class="submenu">
+                    <li><a href="#" onclick="showContent('bab5-a')">A. Ujian Pertama</a></li>
+                    <li><a href="#" onclick="showContent('bab5-b')">B. Puasa Sunnah</a></li>
+                </ul>
+            </div>
+
+            <div class="menu-category">Review Hadis Digital</div>
+
+            <!-- MENU REVIEWS WITH SUB-SUB MENUS (Nested Level 1, 2, and 3) -->
+            <div class="nested-group">
+                <button class="menu-item">REVIEW PDF <span class="arrow"></span></button>
+                <ul class="submenu">
+                    <!-- Sub-menu 1 -->
+                    <li class="nested-sub-group">
+                        <button class="sub-toggle">Review E-Book & Website <span class="arrow"></span></button>
+                        <ul class="sub-submenu">
+                            <li><a href="#" onclick="showPDF('review1.pdf')">📄 Review 1: Ensiklopedia Hadis</a></li>
+                            <li><a href="#" onclick="showPDF('review2.pdf')">📄 Review 2: Web Hadits Tazkia</a></li>
+                            <li><a href="#" onclick="showPDF('review3.pdf')">📄 Review 3: Web Hadits Arina</a></li>
+                            <li><a href="#" onclick="showPDF('review4.pdf')">📄 Review 4: Web Muhamad Basuki</a></li>
+                        </ul>
+                    </li>
+                    <!-- Sub-menu 2 -->
+                    <li class="nested-sub-group">
+                        <button class="sub-toggle">Review Aplikasi & Desktop <span class="arrow"></span></button>
+                        <ul class="sub-submenu">
+                            <li><a href="#" onclick="showPDF('review5.pdf')">📄 Review 5: Aplikasi Android</a></li>
+                            <li><a href="#" onclick="showPDF('review6.pdf')">📄 Review 6: Maktabah Syamilah</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="menu-category">Informasi Akhir</div>
+            
+            <!-- Menu Profil Penulis -->
+            <div class="nested-group">
+                <button class="menu-item" onclick="showContent('profil-penulis')">👤 PROFIL PENULIS</button>
+            </div>
+
+        </nav>
+    </div>
+
+    <!-- KONTEN UTAMA (KANAN) -->
+    <div class="main-content">
+        
+        <!-- CONTAINER UNTUK TEKS EKSTERNAL -->
+        <div id="textContainer">
+            
+            <!-- HALAMAN UTAMA / COVER -->
+            <div id="halaman-utama" class="content-section active">
+                <div class="cover-container">
+                    <p class="cover-tagline">Studi Hadis Digital</p>
+                    <h1 class="cover-title">PENGENDALIAN DIRI DALAM PERSPEKTIF HADIS NABI</h1>
+                    <p class="cover-subtitle">Membangun Kedewasaan Spiritual dan Akhlak Mulia Melalui Tuntunan Sunnah</p>
+                    <div class="cover-author">Editor: Muhammad Basir</div>
+                </div>
+                <div style="margin-top: 25px; line-height: 1.8; text-align: justify; color: #555;">
+                    <p>Selamat datang di Dashboard Interaktif Aplikasi E-Book Studi Hadis. Gunakan panel navigasi menu di sebelah kiri untuk membaca bab-bab teks tematik e-book secara langsung atau meninjau berkas review aplikasi digital berbasis PDF secara dinamis dan responsif.</p>
+                </div>
+            </div>
+
+            <!-- KATA PENGANTAR -->
+            <div id="kata-pengantar" class="content-section">
+                <h1>KATA PENGANTAR</h1>
+                <p class="explanation" style="margin-top:15px;">
+                    Pengendalian diri merupakan salah satu nilai inti dalam ajaran Islam yang memiliki peran penting dalam membentuk kepribadian seorang Muslim. Kemampuan mengendalikan emosi, hawa nafsu, serta sikap terhadap dunia menjadi fondasi utama dalam mewujudkan akhlak mulia dan kedewasaan spiritual. Hadis-hadis Nabi Saw. memberikan bimbingan yang sangat kaya mengenai aspek ini. E-book ini disusun dengan menggunakan pendekatan studi hadis tematik (maudhu'i).
+                </p>
+            </div>
+
+            <!-- BAB I -->
+            <div id="bab1-a" class="content-section">
+                <h1>BAB I: PENGENDALIAN EMOSI DAN AMARAH</h1>
+                <h2>a. Kekuatan Sejati dalam Mengendalikan Amarah</h2>
+                <div class="arabic">لَيْسَ الشَّدِ بِالصُّرَعَةِ، إِنَّمَا الشَّدِيدُ الَّذِي يَمْلِكُ نَفْسَهُ عِنْدَ الْغَضَبِ</div>
+                <div class="translation"><strong>Terjemahan:</strong> "Orang yang kuat bukanlah orang yang menang dalam bergulat, melainkan orang yang kuat adalah orang yang mampu mengendalikan dirinya ketika marah." (HR. Bukhari)</div>
+            </div>
+
+            <div id="bab1-b" class="content-section">
+                <h1>BAB I: PENGENDALIAN EMOSI DAN AMARAH</h1>
+                <h2>b. Larangan Marah sebagai Wasiat Nabi</h2>
+                <div class="arabic">قَالَ: لَا تَغْضَبْ فَرَدَّدَ مِرَارًا، قَالَ: لَا تَغْضَبْ</div>
+                <div class="translation"><strong>Terjemahan:</strong> Beliau (Rasulullah ﷺ) bersabda, "Jangan marah." Orang itu mengulanginya beberapa kali, dan beliau tetap bersabda, "Jangan marah." (HR. Bukhari)</div>
+            </div>
+
+            <div id="bab1-c" class="content-section">
+                <h1>BAB I: PENGENDALIAN EMOSI DAN AMARAH</h1>
+                <h2>c. Keutamaan Menahan Amarah dan Balasannya di Akhirat</h2>
+                <div class="arabic">مَنْ كَظَمَ غَيْظًا، وَهُوَ قَادِرٌ عَلَى أَنْ يُنْفِذَهُ، دَعَاهُ اللَّهُ عَزَّ وَجَلَّ عَلَى رُءُوسِ الْخَلَائِقِ يَوْمَ الْقِيَامَةِ، حَتَّ يُخَيِّرَهُ مِنْ أَيِّ الْحُورِ شَاءَ</div>
+                <div class="translation"><strong>Terjemahan:</strong> "Barang siapa menahan amarahnya, padahal ia mampu untuk melampiaskannya, niscaya Allah akan memanggilnya di hadapan seluruh makhluk pada hari kiamat, lalu Allah memberinya pilihan dari bidadari mana saja yang ia kehendaki." (HR. Abu Dawud)</div>
+            </div>
+
+            <div id="bab1-d" class="content-section">
+                <h1>BAB I: PENGENDALIAN EMOSI DAN AMARAH</h1>
+                <h2>d. Keutamaan Memaafkan dan Menahan Diri dari Pembalasan</h2>
+                <div class="arabic">مَا نَقَصَتْ صَدَقَةٌ مِنْ مَالٍ، وَمَا زَادَ اللَّهُ عَبْدًا بِعَفْوٍ إِلَّا عِزًّا، وَمَا تَوَاضَعَ أَحَدٌ لِلَّهِ إِلَّا رَفَعَهُ اللَّهُ</div>
+                <div class="translation"><strong>Terjemahan:</strong> "Sedekah tidak akan mengurangi harta. Tidaklah Allah menambah kepada seorang hamba karena sifat pemaaf kecuali kemuliaan. Dan tidaklah seseorang merendahkan diri karena Allah, melainkan Allah akan mengangkat derajatnya." (HR. Muslim)</div>
+            </div>
+
+            <!-- BAB II -->
+            <div id="bab2-a" class="content-section">
+                <h1>BAB II: PENGENDALIAN LISAN DAN UCAPAN</h1>
+                <h2>A. Menjaga Lisan sebagai Cermin Keimanan</h2>
+                <div class="arabic">وَمَنْ كَانَ يُؤْمِنُ بِاللَّهِ وَالْيَوْمِ الْآخِرِ فَلْيَقُلْ خَيْرًا أَوْ ِيَصْمُتْ</div>
+                <div class="translation"><strong>Terjemahan:</strong> "Dan barang siapa beriman kepada Allah dan hari akhir, hendaklah ia berkata baik atau diam." (HR. Bukhari)</div>
+            </div>
+
+            <div id="bab2-b" class="content-section">
+                <h1>BAB II: PENGENDALIAN LISAN DAN UCAPAN</h1>
+                <h2>B. Bahaya Ucapan dan Dampaknya terhadap Keselamatan Akhirat</h2>
+                <div class="arabic">إِنَّ الْعَبْدَ لَيَتَكَلَّمُ بِالْكَلِمَةِ مِنْ رِضْوَانِ اللَّهِ لَا يُلْقِي لَهَا بَالًا، يَرْفَعُ اللَّهُ بِهَا دَرَجَاتٍ، وَإِنَّ الْعَبْدَ لَيَتَكَلَّ بِالْكَلِمَةِ مِنْ سَخَطِ اللَّهِ لَا يُلْقِي لَهَا بَالًا، يَهْوِي بِهَا فِي جَهَنَّمَ</div>
+                <div class="translation"><strong>Terjemahan:</strong> "...Satu kalimat yang dimurkai Allah tanpa ia menyadari dampaknya, maka kalimat itu menyeretnya ke dalam neraka Jahanam." (HR. Bukhari)</div>
+            </div>
+
+            <div id="bab2-c" class="content-section">
+                <h1>BAB II: PENGENDALIAN LISAN DAN UCAPAN</h1>
+                <h2>C. Meninggalkan Hal yang Tidak Bermanfaat sebagai Tanda Kesempurnaan Islam</h2>
+                <div class="arabic">مِنْ حُسْنِ إِسْلَامِ الْمَرْءِ تَرْكُهُ مَا لَا يَعْنِيهِ</div>
+                <div class="translation"><strong>Terjemahan:</strong> “Termasuk tanda kebaikan Islam seseorang adalah meninggalkan apa yang tidak bermanfaat baginya.” (HR. At-Tirmidzi)</div>
+            </div>
+
+            <!-- BAB III -->
+            <div id="bab3-a" class="content-section">
+                <h1>BAB III: PENGENDALIAN SYAHWAT DAN KONSUMSI</h1>
+                <h2>A. Pengendalian Syahwat melalui Pernikahan dan Puasa</h2>
+                <div class="arabic">يَا مَعْشَرَ الشَّبَابِ مَنِ اسْتَطَاعَ مِنْكُمُ الْبَاءَةَ فَلْيَتَزَوَّجْ... وَمَنْ لَمْ يَسْتَطِعْ فَعَلَيْهِ بِالصَّوْمِ فَإِنَّهُ لَهُ وِجَاءٌ</div>
+                <div class="translation"><strong>Terjemahan:</strong> ‘Wahai para pemuda, barang siapa di antara kalian telah mampu (menikah), maka hendaklah ia menikah... Dan barang siapa belum mampu, maka hendaklah ia berpuasa, karena puasa itu menjadi pengendali (pengekang) baginya.’ (HR. Bukhari)</div>
+            </div>
+
+            <div id="bab3-b" class="content-section">
+                <h1>BAB III: PENGENDALIAN SYAHWAT DAN KONSUMSI</h1>
+                <h2>B. Larangan Berlebih-lebihan dalam Memanfaatkan Nikmat</h2>
+                <div class="arabic">كُلُوا، وَاشْرَبُوا، وَتَصَدَّقُوا، وَالْبَسُوا فِي غَيْرِ مَخِيلَةٍ وَلَا سَرَفٍ</div>
+                <div class="translation"><strong>Terjemahan:</strong> “Makanlah, minumlah, bersedekahlah, dan berpakaianlah, tanpa kesombongan dan tanpa berlebih-lebihan...” (HR. Ahmad)</div>
+            </div>
+
+            <div id="bab3-c" class="content-section">
+                <h1>BAB III: PENGENDALIAN SYAHWAT DAN KONSUMSI</h1>
+                <h2>C. Menjaga Perut sebagai Bentuk Pengendalian Diri</h2>
+                <div class="arabic">مَا مَلأَ آدَمِيٌّ وِعَاءً شَرًّا مِنْ بَطْنٍ... فَثُلُثٌ لِطَعَامِهِ، وَثُلُثٌ لِشَرَابِهِ، وَثُلُثٌ لِنَفَسِهِ</div>
+                <div class="translation"><strong>Terjemahan:</strong> “Tidaklah seorang anak Adam memenuhi suatu wadah yang lebih buruk daripada perutnya... sepertiga untuk makanannya, sepertiga untuk minumannya, dan sepertiga untuk napasnya.” (HR. At-Tirmidzi)</div>
+            </div>
+
+            <!-- BAB IV -->
+            <div id="bab4-a" class="content-section">
+                <h1>BAB IV: PENGENDALIAN NAFSU DAN ORIENTASI HIDUP</h1>
+                <h2>A. Kecerdasan Hakiki dalam Mengendalikan Hawa Nafsu</h2>
+                <div class="arabic">الْكَيِّسُ مَنْ دَانَ نَفْسَهُ وَعَمِلَ لِمَا بَعْدَ الْمَوْتِ</div>
+                <div class="translation"><strong>Terjemahan:</strong> “Orang yang cerdas adalah orang yang mampu mengendalikan dirinya dan beramal untuk kehidupan setelah mati...” (HR. At-Tirmidzi)</div>
+            </div>
+
+            <div id="bab4-b" class="content-section">
+                <h1>BAB IV: PENGENDALIAN NAFSU DAN ORIENTASI HIDUP</h1>
+                <h2>B. Jalan Cinta Allah (Zuhud)</h2>
+                <div class="arabic">ازْهَدْ فِي الدُّنْيَا يُحِبَّكَ اللَّهُ، وَازْهَدْ فِيمَا فِي أَيْدِي النَّاسِ يُحِبَّكَ النَّاسُ</div>
+                <div class="translation"><strong>Terjemahan:</strong> “Bersikap zuhudlah terhadap dunia, niscaya Allah akan mencintaimu. Dan bersikap zuhudlah terhadap apa yang ada di tangan manusia, niscaya manusia akan mencintaimu.” (HR. Ibn Majah)</div>
+            </div>
+
+            <div id="bab4-c" class="content-section">
+                <h1>BAB IV: PENGENDALIAN NAFSU DAN ORIENTASI HIDUP</h1>
+                <h2>C. Bahaya Ketamakan dan Pentingnya Menahan Keinginan Dunia</h2>
+                <div class="arabic">لَوْ كَانَ لِابْنِ آدَمَ وَادِيَانِ مِنْ مَالٍ لَابْتَغَى وَادِيًا ثَالِثًا، وَلَا يَمْلأُ جَوْفَ ابْنِ آدَمَ إِلا التُّرَابُ</div>
+                <div class="translation"><strong>Terjemahan:</strong> “Seandainya anak Adam memiliki dua lembah harta, niscaya ia akan mencari lembah yang ketiga. Tidak ada yang dapat memenuhi perut anak Adam kecuali tanah...” (HR. Bukhari)</div>
+            </div>
+
+            <!-- BAB V -->
+            <div id="bab5-a" class="content-section">
+                <h1>BAB V: KESABARAN DAN PENGUATAN SPIRITUAL</h1>
+                <h2>A. Kesabaran Sejati saat Menghadapi Ujian Pertama</h2>
+                <div class="arabic">إِنَّمَا الصَّبْرُ عِنْدَ الصَّدْمَةِ الأُولَى</div>
+                <div class="translation"><strong>Terjemahan:</strong> Beliau bersabda: “Sesungguhnya kesabaran itu ada pada saat pertama kali tertimpa musibah.” (HR. Bukhari)</div>
+            </div>
+
+            <div id="bab5-b" class="content-section">
+                <h1>BAB V: KESABARAN DAN PENGUATAN SPIRITUAL</h1>
+                <h2>B. Pengendalian Emosi melalui Ibadah Puasa Sunnah</h2>
+                <div class="arabic">إِذَا رَأَيْتَ هِلاَلَ الْمُحَرَّمِ فَاعْدُدْ، وَأَصْبِحْ يَوْمَ التَّاسِعِ صَائِمًا</div>
+                <div class="translation"><strong>Terjemahan:</strong> “Jika engkau melihat hilal bulan Muḥarram, maka hitunglah. Apabila engkau memasuki pagi hari kesembilan, maka berpuasalah pada hari itu.” (HR. Ahmad)</div>
+            </div>
+
+            <!-- PROFIL PENULIS -->
+            <div id="profil-penulis" class="content-section">
+                <h1>PROFIL EDITOR</h1>
+                <div class="profile-box">
+                    <div class="profile-avatar">MB</div>
+                    <div>
+                        <h3 style="color: var(--primary-color); font-size: 18px;">Muhammad Basir</h3>
+                        <p style="font-size: 13px; color: #666; margin-top: 2px;">NIM: 251305025 | Mahasiswa Uin Sultan Maulana Hasanuddin Banten</p>
+                    </div>
+                </div>
+                <p class="explanation">
+                    Merupakan akademisi muda yang memiliki minat besar dalam kajian hadis tematik, pendidikan Islam, dan pengembangan karakter berbasis digital. Ketertarikan yang mendalam terhadap nilai-nilai moral dan spiritual mendorong penulis untuk mengemas bimbingan Rasulullah ﷺ mengenai pentingnya menjaga emosi, syahwat, dan lisan agar mudah diakses di era modern.
+                </p>
+                <p class="explanation" style="margin-top: 15px;">
+                    Melalui e-book <strong>"Pengendalian Diri dalam Perspektif Hadis Nabi"</strong> ini, penulis dan tim berkomitmen menghadirkan pemahaman yang ringkas, sistematis, dan interaktif agar dapat menjadi sarana refleksi moral sekaligus transformasi akhlak bagi masyarakat luas.
+                </p>
+            </div>
+
+        </div>
+
+        <!-- CONTAINER UNTUK PREVIEW PDF -->
+        <div id="pdfContainer" class="pdf-container">
+            <iframe id="pdfFrame" class="pdf-frame" src=""></iframe>
+        </div>
+
+    </div>
+
+    <!-- JAVASCRIPT UNTUK INTERAKSI MENU -->
+    <script>
+        // 1. Logika Klik Menu Level 1 (Accordion Utama)
+        const menuItems = document.querySelectorAll('.sidebar .nested-group > .menu-item');
+        menuItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const parent = this.parentElement;
+                const submenu = parent.querySelector('.submenu');
+                
+                // Hapus kelas aktif dari menu item lain jika item tersebut merupakan link langsung (bukan dropdown)
+                if(!submenu) {
+                    document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+                    document.querySelectorAll('.submenu li a').forEach(a => a.classList.remove('active'));
+                    this.classList.add('active');
+                }
+                
+                // Toggle status panah jika ada submenu
+                if (submenu) {
+                    parent.classList.toggle('open');
+                    submenu.style.display = submenu.style.display === 'block' ? 'none' : 'block';
+                }
+            });
+        });
+
+        // 2. Logika Klik Menu Level 2 (Sub-Accordion untuk Sub-Sub Menu)
+        const subToggles = document.querySelectorAll('.submenu .sub-toggle');
+        subToggles.forEach(toggle => {
+            toggle.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                const parent = this.parentElement;
+                const subSubmenu = parent.querySelector('.sub-submenu');
+                
+                parent.classList.toggle('open');
+                
+                if (subSubmenu) {
+                    subSubmenu.style.display = subSubmenu.style.display === 'block' ? 'none' : 'block';
+                }
+            });
+        });
+
+        // 3. Logika Menampilkan Konten Teks
+        function showContent(sectionId) {
+            // Tampilkan container teks, sembunyikan PDF
+            document.getElementById('pdfContainer').classList.remove('active');
+            document.getElementById('textContainer').style.display = 'block';
+            
+            // Atur section aktif
+            const sections = document.querySelectorAll('.content-section');
+            sections.forEach(sec => sec.classList.remove('active'));
+            
+            document.getElementById(sectionId).classList.add('active');
+            
+            // Perbarui status aktif pada menu item sidebar
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.submenu li a').forEach(a => a.classList.remove('active'));
+            
+            // Cari elemen a atau button yang memicu fungsi ini
+            const triggeringElement = event.currentTarget;
+            triggeringElement.classList.add('active');
+            
+            closeSidebarOnMobile();
+        }
+
+        // 4. Logika Menampilkan File PDF secara Aman & Responsif
+        function showPDF(pdfFileName) {
+            // Sembunyikan teks, tampilkan container PDF
+            document.getElementById('textContainer').style.display = 'none';
+            const pdfContainer = document.getElementById('pdfContainer');
+            pdfContainer.classList.add('active');
+            
+            // Memuat file PDF secara langsung menggunakan native engine browser 
+            // tanpa bergantung pada server pihak ketiga (mencegah isu CORS)
+            const pdfFrame = document.getElementById('pdfFrame');
+            pdfFrame.src = pdfFileName;
+            
+            // Perbarui status aktif menu
+            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
+            document.querySelectorAll('.submenu li a').forEach(a => a.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            closeSidebarOnMobile();
+        }
+
+        // Helper untuk menutup menu otomatis di perangkat mobile
+        function closeSidebarOnMobile() {
+            if (window.innerWidth <= 768) {
+                document.getElementById('sidebar').classList.remove('open');
+            }
+            document.querySelector('.main-content').scrollTop = 0;
+        }
+
+        // 5. Logika Hamburger Button Mobile Toggle
+        const menuToggle = document.getElementById('menuToggle');
+        const sidebar = document.getElementById('sidebar');
+
+        menuToggle.addEventListener('click', function() {
+            sidebar.classList.toggle('open');
+        });
+
+        // Menutup sidebar jika pengguna mengklik di luar area menu (mobile click-away)
+        document.addEventListener('click', function(event) {
+            if (!sidebar.contains(event.target) && !menuToggle.contains(event.target) && sidebar.classList.contains('open')) {
+                sidebar.classList.remove('open');
+            }
+        });
+    </script>
+</body>
+</html>
